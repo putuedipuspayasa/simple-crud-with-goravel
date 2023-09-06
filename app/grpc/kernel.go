@@ -8,7 +8,7 @@ type Kernel struct {
 }
 
 // The application's global GRPC interceptor stack.
-// These middleware are run during every request to your application.
+// These middleware are run during every requests to your application.
 func (kernel *Kernel) UnaryServerInterceptors() []grpc.UnaryServerInterceptor {
 	return []grpc.UnaryServerInterceptor{}
 }

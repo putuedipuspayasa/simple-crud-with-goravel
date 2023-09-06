@@ -3,7 +3,7 @@ package routes
 import (
 	"github.com/goravel/framework/contracts/http"
 	"github.com/goravel/framework/facades"
-	"goravel/app/repositories/user_repository/user_gorm"
+	"goravel/app/repositories/user_repository/user_goravel_orm"
 	"goravel/app/services/user_service/user_service_v1"
 
 	"goravel/app/http/controllers"
@@ -17,10 +17,11 @@ func Web() {
 	})
 
 	// user
-	userR := user_gorm.NewUserRepository()
+	userR := user_goravel_orm.NewUserRepository()
 	userS := user_service_v1.NewUserService(userR)
 	userController := controllers.NewUserController(userS)
 	facades.Route().Get("/users", userController.Fetch)
 	facades.Route().Get("/user/{uuid}", userController.Show)
 	facades.Route().Post("/user", userController.Store)
+	facades.Route().Delete("/user/{uuid}", userController.Delete)
 }

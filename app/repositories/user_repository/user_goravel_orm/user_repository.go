@@ -1,9 +1,9 @@
-package user_gorm
+package user_goravel_orm
 
 import (
 	"context"
 	"github.com/goravel/framework/facades"
-	"goravel/app/http/request/user_request"
+	"goravel/app/http/requests/user_request"
 	"goravel/app/http/responses"
 	"goravel/app/models"
 )
@@ -26,7 +26,8 @@ func (r userRepository) Fetch(ctx context.Context, request user_request.UserGetR
 		perPage = *request.PerPage
 	}
 
-	err = facades.Orm().Query().Omit("password").Paginate(page, perPage, &users, &pagination.Total)
+	query := filter(facades.Orm().Query(), request)
+	err = query.Omit("password").Paginate(page, perPage, &users, &pagination.Total)
 	if err != nil {
 		return
 	}
@@ -41,7 +42,14 @@ func (r userRepository) Store(ctx context.Context, user *models.User) (err error
 	return
 }
 
-func (r userRepository) Get(ctx context.Context, UUID string) (user models.User, err error) {
-	err = facades.Orm().Query().Where("uuid = ?", UUID).First(&user)
+func (r userRepository) Get(ctx context.Context, request user_request.UserGetRequest) (user models.User, err error) {
+	query := filter(facades.Orm().Query(), request)
+	err = query.FirstOrFail(&user)
+	return
+}
+
+func (r userRepository) Delete(ctx context.Context, request user_request.UserGetRequest) (err error) {
+	query := filter(facades.Orm().Query(), request)
+	_, err = query.Delete(&models.User{})
 	return
 }

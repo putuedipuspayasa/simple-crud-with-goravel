@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/goravel/framework/contracts/http"
 	"goravel/app/helpers"
-	"goravel/app/http/request/user_request"
+	"goravel/app/http/requests/user_request"
 	"goravel/app/services/user_service"
 )
 
@@ -21,12 +21,12 @@ func NewUserController(UserService user_service.UserService) *UserController {
 func (r *UserController) Fetch(ctx http.Context) {
 	fetchUserRequest := user_request.UserGetRequest{}
 
-	page := ctx.Request().QueryInt("page", 1)
-	perPage := ctx.Request().QueryInt("per_page", 10)
-
-	fetchUserRequest.Page = &page
-	fetchUserRequest.PerPage = &perPage
-
+	err := ctx.Request().Bind(&fetchUserRequest)
+	if err != nil {
+		helpers.ErrorResponse(ctx, http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+	
 	users, pagination, err := r.UserService.Fetch(ctx, fetchUserRequest)
 	if err != nil {
 		helpers.ErrorResponse(ctx, http.StatusUnprocessableEntity, err.Error())
@@ -56,6 +56,7 @@ func (r *UserController) Store(ctx http.Context) {
 		helpers.ErrorResponse(ctx, http.StatusUnprocessableEntity, errors.All())
 		return
 	}
+
 	user, err := r.UserService.Store(ctx, storeUserRequest)
 
 	if err != nil {
@@ -70,7 +71,7 @@ func (r *UserController) Store(ctx http.Context) {
 	return
 }
 
-func (r UserController) Show(ctx http.Context) {
+func (r *UserController) Show(ctx http.Context) {
 	uuid := ctx.Request().Route("uuid")
 	user, err := r.UserService.Get(ctx, uuid)
 	if err != nil {
@@ -80,6 +81,21 @@ func (r UserController) Show(ctx http.Context) {
 
 	ctx.Response().Success().Json(http.Json{
 		"data":    user,
+		"message": "success",
+	})
+	return
+}
+
+func (r *UserController) Delete(ctx http.Context) {
+	uuid := ctx.Request().Route("uuid")
+	err := r.UserService.Delete(ctx, uuid)
+	if err != nil {
+		helpers.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.Response().Success().Json(http.Json{
+		"data":    nil,
 		"message": "success",
 	})
 	return

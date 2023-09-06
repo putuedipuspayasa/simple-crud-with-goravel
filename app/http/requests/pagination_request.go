@@ -1,4 +1,4 @@
-package request
+package requests
 
 type PaginationRequest struct {
 	Page    *int `json:"page" form:"page" query:"page"`
